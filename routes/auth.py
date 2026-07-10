@@ -1,9 +1,11 @@
 from flask import Blueprint, request, jsonify
 from services.auth_service import register_user, login_user
+from utils.auth_decorator import token_required
 
 auth_bp = Blueprint("auth", __name__)
 
 
+# signup up
 @auth_bp.route("/signup", methods=["POST"])
 def signup():
 
@@ -38,3 +40,10 @@ def login():
         return jsonify({"success": True, "message": message, "token": token}), 200
 
     return jsonify({"success": False, "message": message}), 401
+
+
+# Profile route(testing authentication using this simple routeS)
+@auth_bp.route("/profile", methods=["GET"])
+@token_required
+def profile():
+    return jsonify({"success": True, "message": "Athenticated successfully"}), 200

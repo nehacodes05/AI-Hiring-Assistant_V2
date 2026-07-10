@@ -66,7 +66,7 @@ def register_user(full_name, email, password, role):
 
 def login_user(email, password):
     """
-    authenticates a user and generate a JWT toke
+    authenticates a user and generate a JWT token
     """
 
     conn = None

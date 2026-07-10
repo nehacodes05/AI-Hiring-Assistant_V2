@@ -3,6 +3,7 @@ import datetime
 from config import SECRET_KEY
 
 
+# generating jwt
 def generate_token(user_id, role):
     """
     Generate a JWT token for an authenticated user.
@@ -23,3 +24,25 @@ def generate_token(user_id, role):
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
     return token
+
+
+# implementing jwt verification
+def verify_token(token):
+    """
+    verifies a jwt token.
+    args :
+         token(str):JWT recieved from the client.
+     returns :
+          dict : Decode payload if the token is valid.
+    """
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+
+        return payload
+
+    except jwt.ExpiredSignatureError:
+        raise
+
+    except jwt.InvalidTokenError:
+        raise
