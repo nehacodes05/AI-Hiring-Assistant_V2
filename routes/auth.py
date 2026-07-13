@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from services.auth_service import register_user, login_user
 from utils.auth_decorator import token_required
 
+
 auth_bp = Blueprint("auth", __name__)
 
 
