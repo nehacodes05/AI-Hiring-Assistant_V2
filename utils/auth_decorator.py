@@ -37,3 +37,22 @@ def token_required(route_function):
         return route_function(*args, **kwargs)
 
     return wrapper
+
+
+# authentication decorator
+def role_required(required_role):
+
+    def decorator(route_function):
+
+        @wraps(route_function)
+        def wrapper(*args, **kwargs):
+
+            user = g.user
+            if user["role"] != required_role:
+                return jsonify({"success": False, "message": "Access denied"}), 403
+
+            return route_function(*args, **kwargs)
+
+        return wrapper
+
+    return decorator

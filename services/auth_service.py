@@ -95,7 +95,6 @@ def login_user(email, password):
         if not user:
             return False, "Invalid email or password", None
 
-        # unpack tuple
         user_id, full_name, user_email, hashed_password, role = user
 
         if not check_password_hash(hashed_password, password):
