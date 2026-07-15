@@ -21,7 +21,7 @@ def create_job_route():
     return jsonify(result), 500
 
 
-# route to view jobs created by recruiter
+# Get jobs
 @jobs_bp.route("/jobs", methods=["GET"])
 @token_required
 def get_jobs_route():

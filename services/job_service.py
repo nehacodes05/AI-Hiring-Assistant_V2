@@ -18,7 +18,7 @@ def create_job(data, user):
 
         # connect to database
         conn = get_db_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         cursor.execute(
             """INSERT INTO jobs(title,description,salary,recruiter_id)
@@ -58,18 +58,29 @@ def get_jobs(user):
 
     try:
         recruiter_id = user["user_id"]
+        user_role = user["role"]
 
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-        query = """
-        SELECT id, title, description, salary, created_at
-        FROM jobs
-        WHERE recruiter_id = %s
-        ORDER BY created_at DESC
-        """
+        # query to run if user is recruiter
+        if user_role == "recruiter":
+            query = """
+            SELECT id, title, description, salary, created_at
+            FROM jobs
+            WHERE recruiter_id = %s
+            ORDER BY created_at DESC
+            """
+            cursor.execute(query, (recruiter_id,))
 
-        cursor.execute(query, (recruiter_id,))
+        # query to run if user is candidate
+        elif user_role == "candidate":
+            query = """
+            SELECT id, title, description, salary, created_at
+            FROM jobs
+            ORDER BY created_at DESC
+            """
+            cursor.execute(query)
 
         jobs = cursor.fetchall()
 
@@ -102,7 +113,7 @@ def update_job(job_id, data, user):
         recruiter_id = user["user_id"]
 
         conn = get_db_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         query = """
         UPDATE jobs
@@ -147,7 +158,7 @@ def delete_job(job_id, user):
     try:
         recruiter_id = user["user_id"]
         conn = get_db_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         query = """
         DELETE FROM jobs
