@@ -1,6 +1,6 @@
-from flask import Blueprint, jsonify, g
+from flask import Blueprint, jsonify, g, request
 from utils.auth_decorator import token_required, role_required
-from services.application_service import apply_to_job, get_applications
+from services.application_service import apply_to_job, get_applications, upload_resume
 
 applications_bp = Blueprint("applications", __name__)
 
@@ -35,6 +35,24 @@ def get_applications_route(job_id):
     user = g.user
 
     result = get_applications(job_id, user)
+
+    if result["success"]:
+        return jsonify(result), 200
+    return jsonify(result), 500
+
+
+# route to upload resume
+@applications_bp.route("/applications/<int:application_id>/resume", methods=["POST"])
+@token_required
+@role_required("candidate")
+def upload_resume_route(application_id):
+
+    user = g.user
+
+    # Get the uploaded PDF from the request
+    resume = request.files.get("resume")
+
+    result = upload_resume(application_id, resume, user)
 
     if result["success"]:
         return jsonify(result), 200
