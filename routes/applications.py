@@ -1,6 +1,10 @@
 from flask import Blueprint, jsonify, g, request
 from utils.auth_decorator import token_required, role_required
-from services.application_service import apply_to_job, get_applications, upload_resume
+from services.application_service import (
+    apply_to_job,
+    get_job_applications,
+    upload_resume,
+)
 
 applications_bp = Blueprint("applications", __name__)
 
@@ -34,7 +38,7 @@ def get_applications_route(job_id):
     # get the logged in user from the jwt payload
     user = g.user
 
-    result = get_applications(job_id, user)
+    result = get_job_applications(job_id, user)
 
     if result["success"]:
         return jsonify(result), 200

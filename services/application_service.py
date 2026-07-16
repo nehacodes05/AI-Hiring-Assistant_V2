@@ -44,40 +44,58 @@ def apply_to_job(job_id, user):
             conn.close()
 
 
-# recruiter views applications
+# recruiter dashboard ,views applications
 
 
-def get_applications(job_id, user):
+def get_job_applications(job_id, user):
 
-    conn = get_db_connection
-    cursor = conn.cursor()
+    conn = None
+    cursor = None
 
-    query = """"
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-        SELECT 
-        users.name,
-        users.email,
-        applications.applied_at
+        query = """ 
 
-        FROM applications
+            SELECT 
+            users.name,
+            users.email,
+            applications.score
+            applications.feedback
+            applications.resume_path
+            applications.applied_at
 
-        JOIN users
-        ON applications.candidate_id=user.id
+            FROM applications
 
-        JOIN jobs
-        On applications.job_id=jobs.id
+            JOIN users
+            ON applications.candidate_id = users.id
 
-        WHERE appliactions.job_id=%s
-        AND jobs.recruiter_id=%s
+            JOIN jobs
+            On applications.job_id=jobs.id
 
-        """
-    recruiter_id = user["user_id"]
+            WHERE applications.job_id=%s
+            AND jobs.recruiter_id=%s
 
-    cursor.execute(query, (job_id, recruiter_id))
+            ORDER BY applications.score DESC;
 
-    applications = cursor.fetchall()
+            """
+        recruiter_id = user["user_id"]
 
-    return {"success": True, "applications": applications}
+        cursor.execute(query, (job_id, recruiter_id))
+
+        applications = cursor.fetchall()
+
+        return {"success": True, "applications": applications}
+
+    except Exception:
+        return {"success": False, "message": "Failed to fetch applications"}
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 # upload pdf function
