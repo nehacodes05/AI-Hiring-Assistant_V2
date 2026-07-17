@@ -59,11 +59,11 @@ def get_job_applications(job_id, user):
         query = """ 
 
             SELECT 
-            users.name,
+            users.full_name,
             users.email,
-            applications.score
-            applications.feedback
-            applications.resume_path
+            applications.score,
+            applications.feedback,
+            applications.resume_path,
             applications.applied_at
 
             FROM applications
@@ -88,7 +88,8 @@ def get_job_applications(job_id, user):
 
         return {"success": True, "applications": applications}
 
-    except Exception:
+    except Exception as e:
+        print(e)
         return {"success": False, "message": "Failed to fetch applications"}
 
     finally:
@@ -171,5 +172,52 @@ def upload_resume(application_id, resume, user):
     finally:
         if cursor:
             cursor.close()
+        if conn:
+            conn.close()
+
+
+# download uploaded resume
+def download_resume(application_id, user):
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_db_connection()
+
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        query = """
+            SELECT
+                applications.resume_path
+
+            FROM applications
+
+            JOIN jobs
+            ON applications.job_id = jobs.id
+
+            WHERE applications.id = %s
+            AND jobs.recruiter_id = %s
+            """
+        recruiter_id = user["user_id"]
+
+        cursor.execute(query, (application_id, recruiter_id))
+
+        resume = cursor.fetchone()
+
+        if not resume:
+            return {"success": False, "message": "Resume not found or access denied."}
+
+        return {"success": True, "resume_path": resume["resume_path"]}
+
+    except Exception as e:
+        print(e)
+
+        return {"success": False, "message": "Failed to fetch resume."}
+
+    finally:
+        if cursor:
+            cursor.close()
+
         if conn:
             conn.close()
